@@ -41,37 +41,36 @@ window.onload = () => {
         shapeOption.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('shape', JSON.stringify(shape));
         });
+
+        // Add click event listener for placing shapes by click
+        shapeOption.addEventListener('click', (e) => {
+            placeShape(shape);
+        });
     });
 
-    // Allow dropping shapes into pattern area
-    patternArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-
-    patternArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const shapeData = JSON.parse(e.dataTransfer.getData('shape'));
+    // Function to place shape at a specific position
+    function placeShape(shape) {
         const shapeElement = document.createElement('div');
         shapeElement.classList.add('shape');
-        shapeElement.style.backgroundColor = shapeData.color;
+        shapeElement.style.backgroundColor = shape.color;
 
         // Adjust size and shape based on type
-        if (shapeData.shape === 'quarter-circle') {
+        if (shape.shape === 'quarter-circle') {
             shapeElement.style.borderRadius = '50% 0 0 0';
-        } else if (shapeData.shape === 'half-circle') {
+        } else if (shape.shape === 'half-circle') {
             shapeElement.style.borderRadius = '50%';
-        } else if (shapeData.shape === 'three-quarter-circle') {
+        } else if (shape.shape === 'three-quarter-circle') {
             shapeElement.style.borderRadius = '0 50% 0 0';
         }
 
         shapeElement.style.width = '50px';
         shapeElement.style.height = '50px';
         shapeElement.style.position = 'absolute'; // Ensure absolute positioning
-        shapeElement.style.left = `${e.offsetX - 25}px`;
-        shapeElement.style.top = `${e.offsetY - 25}px`;
-        shapeElement.dataset.shape = shapeData.shape;
+        shapeElement.style.left = `${patternArea.offsetWidth / 2 - 25}px`; // Center horizontally
+        shapeElement.style.top = `${patternArea.offsetHeight / 2 - 25}px`; // Center vertically
+        shapeElement.dataset.shape = shape.shape;
         patternArea.appendChild(shapeElement); // Append to patternArea
-    });
+    }
 
     // Countdown timer
     const countdown = setInterval(() => {

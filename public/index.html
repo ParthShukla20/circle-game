@@ -33,6 +33,7 @@
         background: white;
         margin: 20px;
         position: relative;
+        border-radius: 50% 50% 50% 50%;
       }
 
       .shape {
@@ -53,7 +54,7 @@
         width: 50px;
         height: 50px;
         margin: 5px;
-        background: gray;
+        background: rgb(217, 79, 79);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -64,7 +65,7 @@
       .shapeOption .quarter-circle {
         width: 0;
         height: 0;
-        border-top: 25px solid yellow;
+        border-top: 25px solid rgb(173, 173, 17);
         border-right: 25px solid transparent;
       }
 
@@ -72,7 +73,7 @@
         width: 50px;
         height: 25px;
         background-color: purple;
-        border-radius: 50% 50% 0 0;
+        border-radius: 50% 50% 50% 0;
       }
 
       .shapeOption .three-quarter-circle {
@@ -89,11 +90,12 @@
     </style>
 </head>
 <body>
+    
     <div id="gameContainer">
         <div id="playerInfo">
             <div id="playerName">Player Name</div>
         </div>
-        <div id="patternArea"></div>
+        <div id="patternArea" class="circle"></div>
         <div id="score">0</div>
         <div id="shapesContainer"></div>
         <div id="timer">88</div>
