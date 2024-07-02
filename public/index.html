@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Copy Game</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #333;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+
+      #gameContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      #playerInfo {
+        margin-bottom: 10px;
+      }
+
+      #patternArea {
+        width: 200px;
+        height: 200px;
+        background: white;
+        margin: 20px;
+        position: relative;
+      }
+
+      .shape {
+        width: 50px;
+        height: 50px;
+        position: absolute;
+        border: 1px solid black; /* Added border for visibility */
+      }
+
+      #shapesContainer {
+        display: flex;
+        flex-wrap: wrap;
+        width: 150px;
+        margin-bottom: 20px;
+      }
+
+      .shapeOption {
+        width: 50px;
+        height: 50px;
+        margin: 5px;
+        background: gray;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: relative; /* Ensure child shapes are positioned relative to .shapeOption */
+      }
+
+      .shapeOption .quarter-circle {
+        width: 0;
+        height: 0;
+        border-top: 25px solid yellow;
+        border-right: 25px solid transparent;
+      }
+
+      .shapeOption .half-circle {
+        width: 50px;
+        height: 25px;
+        background-color: purple;
+        border-radius: 50% 50% 0 0;
+      }
+
+      .shapeOption .three-quarter-circle {
+        width: 0;
+        height: 0;
+        border-top: 25px solid blue;
+        border-left: 25px solid transparent;
+      }
+
+      #timer {
+        font-size: 24px;
+        margin-top: 20px;
+      }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="playerInfo">
+            <div id="playerName">Player Name</div>
+        </div>
+        <div id="patternArea"></div>
+        <div id="score">0</div>
+        <div id="shapesContainer"></div>
+        <div id="timer">88</div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script> -->
+
+    <script src="game.js"></script>
+</body>
+</html>
