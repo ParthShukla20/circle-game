@@ -34,7 +34,7 @@ window.onload = () => {
     shapes.forEach((shape, index) => {
         const shapeOption = document.createElement('div');
         shapeOption.classList.add('shapeOption');
-        shapeOption.style.backgroundColor = 'white'; // Background color set to white
+        shapeOption.style.backgroundColor = 'grey'; // Background color set to white
         shapeOption.dataset.shape = shape.shape;
 
         // Create inner element for the actual shape
@@ -85,7 +85,7 @@ window.onload = () => {
         } else if (shape.shape === 'half-circle') {
             shapeElement.style.borderRadius = '50%';
         } else if (shape.shape === 'three-quarter-circle') {
-            shapeElement.style.borderRadius = '0 50% 0 0';
+            shapeElement.style.borderRadius = '50% 50% 50% 0';
         }
 
         shapeElement.style.width = '50px';
@@ -94,14 +94,14 @@ window.onload = () => {
         
         // Adjust the position based on the current player
         if (currentPlayer === 1) {
-            shapeElement.style.left = `${patternArea.offsetWidth / 4 - 25}px`; // Center horizontally for Player 1
+            shapeElement.style.left = `${patternArea.offsetWidth / 4 - 25}px`; 
         } else {
-            shapeElement.style.left = `${(patternArea.offsetWidth / 4) * 3 - 25}px`; // Center horizontally for Player 2
+            shapeElement.style.left = `${(patternArea.offsetWidth / 4) * 3 - 25}px`; 
         }
         
-        shapeElement.style.top = `${patternArea.offsetHeight / 2 - 25}px`; // Center vertically
+        shapeElement.style.top = `${patternArea.offsetHeight / 2 - 25}px`; 
         shapeElement.dataset.shape = shape.shape;
-        patternArea.appendChild(shapeElement); // Append to patternArea
+        patternArea.appendChild(shapeElement); 
     }
 
     // Countdown timer
@@ -153,31 +153,55 @@ window.onload = () => {
         }
     }
 
-    // Function to determine the round winner
-    function determineRoundWinner() {
-        // Simple comparison logic to check if the patterns are the same
-        const patternsMatch = JSON.stringify(player1Pattern) === JSON.stringify(player2Pattern);
+   
+// Function to determine the round winner
+function determineRoundWinner() {
+    // Simple comparison logic to check if the patterns are the same
+    const patternsMatch = JSON.stringify(player1Pattern) === JSON.stringify(player2Pattern);
 
-        if (patternsMatch) {
-            player2Wins++;
-            alert('Player 2 wins this round!');
+    if (patternsMatch) {
+        alert('Patterns match! It\'s a draw.');
+    } else {
+        // Compare the number of shapes in each pattern
+        if (player1Pattern.length !== player2Pattern.length) {
+            if (player1Pattern.length > player2Pattern.length) {
+                player1Wins++;
+                alert('Player 1 wins this round!');
+            } else {
+                player2Wins++;
+                alert('Player 2 wins this round!');
+            }
         } else {
-            player1Wins++;
-            alert('Player 1 wins this round!');
-        }
-
-        // Check if we have an overall winner
-        if (player1Wins === 2) {
-            alert('Player 1 wins the match!');
-            socket.emit('gameResult', { winner: 'Player 1', loser: 'Player 2' });
-        } else if (player2Wins === 2) {
-            alert('Player 2 wins the match!');
-            socket.emit('gameResult', { winner: 'Player 2', loser: 'Player 1' });
-        } else {
-            // Start a new round
-            startNewRound();
+            let isEqual = true;
+            for (let i = 0; i < player1Pattern.length; i++) {
+                if (player1Pattern[i].color !== player2Pattern[i].color || player1Pattern[i].shape !== player2Pattern[i].shape) {
+                    isEqual = false;
+                    break;
+                }
+            }
+            if (isEqual) {
+                alert('Patterns match! It\'s a draw.');
+            } else {
+                player1Wins++;
+                alert('Player 1 wins this round!');
+            }
         }
     }
+
+    // Check if we have an overall winner
+    if (player1Wins === 2) {
+        alert('Player 1 wins the match!');
+        socket.emit('gameResult', { winner: 'Player 1', loser: 'Player 2' });
+    } else if (player2Wins === 2) {
+        alert('Player 2 wins the match!');
+        socket.emit('gameResult', { winner: 'Player 2', loser: 'Player 1' });
+    } else {
+        // Start a new round
+        startNewRound();
+    }
+}
+
+
 
     // Function to start a new round
     function startNewRound() {

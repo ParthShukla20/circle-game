@@ -30,7 +30,7 @@
       #patternArea {
         width: 200px;
         height: 200px;
-        background: white;
+        background: grey;
         margin: 20px;
         position: relative;
         border-radius: 50% 50% 50% 50%;
@@ -40,7 +40,7 @@
         width: 50px;
         height: 50px;
         position: absolute;
-        border: 1px solid black; /* Added border for visibility */
+        /* border: 1px solid black;  */
       }
 
       #shapesContainer {
@@ -53,8 +53,8 @@
       .shapeOption {
         width: 50px;
         height: 50px;
-        margin: 5px;
-        background: white; /* Changed to white background */
+        margin: 10px;
+        background: grey;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -63,28 +63,31 @@
       }
 
       .shapeOption .quarter-circle {
-        width: 0;
-        height: 0;
+        width: 25px;
+        height: 25px;
         border-top: 25px solid yellow; /* Shape color */
         border-right: 25px solid transparent;
+        border-radius: 0% 50% 50% 0;
       }
 
       .shapeOption .half-circle {
         width: 50px;
-        height: 25px;
+        height: 50px;
         background-color: purple;
-        border-radius: 50% 50% 0 0;
+        border-radius: 100%;
       }
 
       .shapeOption .three-quarter-circle {
-        width: 0;
-        height: 0;
+        width:25px;
+        height: 25px;
         border-top: 25px solid blue; /* Shape color */
         border-left: 25px solid transparent;
+        border-radius: 50% 50% 50% 0;
       }
 
       #timer {
         font-size: 24px;
+   
         margin-top: 20px;
       }
 
@@ -93,6 +96,7 @@
         padding: 10px 20px;
         font-size: 16px;
         cursor: pointer;
+        background: grey;
       }
     </style>
 </head>
@@ -105,7 +109,7 @@
         <div id="score">0</div>
         <div id="shapesContainer"></div>
         <div id="timer">90</div>
-        <button id="stopTimerButton">Stop Timer</button>
+        <button id="stopTimerButton">Stop and Submit</button>
     </div>
     
     <script src="/socket.io/socket.io.js"></script>
