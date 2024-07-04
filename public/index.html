@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport</div>" content="width=device-width, initial-scale=1.0">
     <title>Photo Copy Game</title>
     <style>
       body {
@@ -34,6 +35,7 @@
         margin: 20px;
         position: relative;
         border-radius: 50% 50% 50% 50%;
+        overflow: hidden;
       }
 
       .shape {
@@ -43,47 +45,66 @@
         /* border: 1px solid black;  */
       }
 
+      
       #shapesContainer {
         display: flex;
         flex-wrap: wrap;
-        width: 150px;
-        margin-bottom: 20px;
-      }
+        gap: 10px;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        max-width: 200px; /* Adjust max-width as needed */
+    }
 
-      .shapeOption {
-        width: 50px;
-        height: 50px;
-        margin: 10px;
-        background: grey;
+    .shapeOption {
+        width: calc(50% - 15px); /* Calculate width for 2 shapes per row with gap */
+        height: 80px; /* Maintain height */
+        border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        position: relative; /* Ensure child shapes are positioned relative to .shapeOption */
-      }
+        position: relative;
+        overflow: hidden;
+    }
+        .innerShape {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .half-circle1 {
+            background-color: yellow;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+        .half-circle2 {
+            background-color: yellow;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            transform: rotate(90deg);
+        }
+        .pie1 {
+            background-color: blue;
+            clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
+        }
+        .pie2 {
+            background-color: blue;
+            clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
+            transform: rotate(270deg);
+        }
+        .quarter-circle1 {
+            width: 100px; /* Adjust width as needed */
+            height: 100px; /* Adjust height as needed */
+            background-color: purple; /* Background color for the shape */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
+        }
+        .quarter-circle2 {
+            width: 100px; /* Adjust width as needed */
+            height: 100px; /* Adjust height as needed */
+            background-color: purple; /* Background color for the shape */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
+            transform: rotate(180deg);
+        }
 
-      .shapeOption .quarter-circle {
-        width: 25px;
-        height: 25px;
-        border-top: 25px solid yellow; /* Shape color */
-        border-right: 25px solid transparent;
-        border-radius: 0% 50% 50% 0;
-      }
-
-      .shapeOption .half-circle {
-        width: 50px;
-        height: 50px;
-        background-color: purple;
-        border-radius: 100%;
-      }
-
-      .shapeOption .three-quarter-circle {
-        width:25px;
-        height: 25px;
-        border-top: 25px solid blue; /* Shape color */
-        border-left: 25px solid transparent;
-        border-radius: 50% 50% 50% 0;
-      }
 
       #timer {
         font-size: 24px;
@@ -98,9 +119,32 @@
         cursor: pointer;
         background: grey;
       }
+
+      .resultContainer {
+        display: flex;
+        width: 200px;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px;
+        background: #007bff;
+        padding: 30px 10px;
+      }
+      
+      .container {
+        width: 100%;
+        text-align: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+      }
     </style>
 </head>
 <body>
+  <div class="container">
+    <div id="player1Result" class="resultContainer">
+        <div>Player 1 Result</div>
+        <div id="playerScore"></div>
+    </div>
     <div id="gameContainer">
         <div id="playerInfo">
             <div id="playerName">Player Name</div>
@@ -111,7 +155,11 @@
         <div id="timer">90</div>
         <button id="stopTimerButton">Stop and Submit</button>
     </div>
-    
+    <div id="player2Result" class="resultContainer">
+        <div>Player 2 Result</div>
+        <div id="playerScore"></div>
+    </div>
+  </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
     <script src="game.js"></script>
