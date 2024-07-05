@@ -11,7 +11,7 @@ let shapes = [
 ];
 
 let currentPlayer = 1; // Start with player 1
-let player1Pattern = [];
+let player1Queue = [];
 let player2Pattern = [];
 let player1Wins = 0;
 let player2Wins = 0;
@@ -50,18 +50,13 @@ window.onload = () => {
             innerShape.classList.add('half-circle2');
         } else if (shape.shape === 'quarter-circle1') {
             innerShape.classList.add('quarter-circle1');
-        }
-        else if (shape.shape === 'quarter-circle2') {
+        } else if (shape.shape === 'quarter-circle2') {
             innerShape.classList.add('quarter-circle2');
-        }
-        else if (shape.shape === 'pie1') {
+        } else if (shape.shape === 'pie1') {
             innerShape.classList.add('pie1');
-        }
-
-        else if (shape.shape === 'pie2') {
+        } else if (shape.shape === 'pie2') {
             innerShape.classList.add('pie2');
         }
-
 
         shapeOption.appendChild(innerShape);
         shapesContainer.appendChild(shapeOption);
@@ -83,7 +78,6 @@ window.onload = () => {
         });
     });
 
-    // Function to place shape at a specific position
     // Function to place shape at a specific position
     function placeShape(shape) {
         if (!gameActive) return; // Do nothing if game is not active
@@ -125,9 +119,22 @@ window.onload = () => {
         shapeElement.dataset.shape = shape.shape;
 
         patternArea.appendChild(shapeElement);
+
+        // Record the shape and its position
+        const shapeDetails = {
+            color: shape.color,
+            shape: shape.shape,
+            x: shapeElement.style.left,
+            y: shapeElement.style.top
+        };
+
+        // Add to queue for player 1, store for player 2
+        if (currentPlayer === 1) {
+            player1Queue.push(shapeDetails);
+        } else {
+            player2Pattern.push(shapeDetails);
+        }
     }
-
-
 
     // Countdown timer
     function startTimer() {
@@ -154,63 +161,36 @@ window.onload = () => {
     function endTurn() {
         gameActive = false;
 
-        const pattern = [];
-        const currentPatternArea = currentPlayer === 1 ? patternArea1 : patternArea2;
-        currentPatternArea.querySelectorAll('.shape').forEach(shape => {
-            pattern.push({
-                color: shape.style.backgroundColor,
-                shape: shape.dataset.shape,
-                x: shape.style.left,
-                y: shape.style.top
-            });
-        });
-
         if (currentPlayer === 1) {
-            player1Pattern = pattern;
-            socket.emit('sendShape', { roomId: 'room1', pattern: player1Pattern });
+            socket.emit('sendShape', { roomId: 'room1', pattern: player1Queue });
             currentPlayer = 2;
             playerNameElement.textContent = `Player 2, Draw your pattern.`;
             gameActive = true; // Allow second player to draw
             timer = 90;
             startTimer();
         } else {
-            player2Pattern = pattern;
             determineRoundWinner();
         }
     }
 
     // Function to determine the round winner
     function determineRoundWinner() {
-        // Simple comparison logic to check if the patterns are the same
-        const patternsMatch = JSON.stringify(player1Pattern) === JSON.stringify(player2Pattern);
+        // Compare player2Pattern with player1Queue
+        const isMatch = player2Pattern.every((shape, index) => {
+            return (
+                shape.shape === player1Queue[index].shape &&
+                shape.color === player1Queue[index].color &&
+                shape.x === player1Queue[index].x &&
+                shape.y === player1Queue[index].y
+            );
+        });
 
-        if (patternsMatch) {
-            alert('Patterns match! It\'s a draw.');
+        if (isMatch && player2Pattern.length === player1Queue.length) {
+            player2Wins++;
+            alert('Player 2 wins this round!');
         } else {
-            // Compare the number of shapes in each pattern
-            if (player1Pattern.length !== player2Pattern.length) {
-                if (player1Pattern.length > player2Pattern.length) {
-                    player1Wins++;
-                    alert('Player 1 wins this round!');
-                } else {
-                    player2Wins++;
-                    alert('Player 2 wins this round!');
-                }
-            } else {
-                let isEqual = true;
-                for (let i = 0; i < player1Pattern.length; i++) {
-                    if (player1Pattern[i].color !== player2Pattern[i].color || player1Pattern[i].shape !== player2Pattern[i].shape) {
-                        isEqual = false;
-                        break;
-                    }
-                }
-                if (isEqual) {
-                    alert('Patterns match! It\'s a draw.');
-                } else {
-                    player1Wins++;
-                    alert('Player 1 wins this round!');
-                }
-            }
+            player1Wins++;
+            alert('Player 1 wins this round!');
         }
 
         // Check if we have an overall winner
@@ -238,7 +218,7 @@ window.onload = () => {
                 socket.emit('gameResult', { winner: 'Player 2', loser: 'Player 1' });
             }
         } else {
-            player1Pattern = [];
+            player1Queue = [];
             player2Pattern = [];
             patternArea1.innerHTML = ''; // Clear the pattern area for Player 1
             patternArea2.innerHTML = ''; // Clear the pattern area for Player 2
@@ -260,20 +240,25 @@ window.onload = () => {
             shapeElement.style.backgroundColor = shape.color;
 
             // Adjust size and shape based on type
-            /* if (shape.shape === 'quarter-circle1') {
-                shapeElement.style.width = '50px';
-                shapeElement.style.height = '50px';
-                shapeElement.style.borderRadius = '50% 0 0 0';
-            } else if (shape.shape === 'half-circle1') {
-                shapeElement.style.width = '50px';
-                shapeElement.style.height = '50px';
-                shapeElement.style.borderRadius = '50%';
-            } else if (shape.shape === 'three-quarter-circle') {
-                shapeElement.style.width = '50px';
-                shapeElement.style.height = '50px';
-                shapeElement.style.borderRadius = '50% 50% 50% 0';
-            } */
+            if (shape.shape === 'half-circle1') {
+                shapeElement.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 100%)';
+                shapeElement.style.transform = 'rotate(90deg)';
+            } else if (shape.shape === 'half-circle2') {
+                shapeElement.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 100%)';
+            } else if (shape.shape === 'pie1') {
+                shapeElement.style.clipPath = 'polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%)';
+            } else if (shape.shape === 'pie2') {
+                shapeElement.style.clipPath = 'polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%)';
+                shapeElement.style.transform = 'rotate(270deg)';
+            } else if (shape.shape === 'quarter-circle1') {
+                shapeElement.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%)';
+            } else if (shape.shape === 'quarter-circle2') {
+                shapeElement.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%)';
+                shapeElement.style.transform = 'rotate(180deg)';
+            }
 
+            shapeElement.style.width = '50px';
+            shapeElement.style.height = '50px';
             shapeElement.style.position = 'absolute';
             shapeElement.style.left = shape.x;
             shapeElement.style.top = shape.y;
