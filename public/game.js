@@ -2,16 +2,16 @@ const socket = io();
 
 const playerName = "Parth"; // Example player name
 let shapes = [
-    { color: 'yellow', shape: 'half-circle1' }, 
-    { color: 'yellow', shape: 'half-circle2' }, 
-    { color: 'purple', shape: 'quarter-circle1' }, 
-    { color: 'purple', shape: 'quarter-circle2' }, 
-    { color: 'blue', shape: 'pie1' }, 
+    { color: 'yellow', shape: 'half-circle1' },
+    { color: 'yellow', shape: 'half-circle2' },
+    { color: 'purple', shape: 'quarter-circle1' },
+    { color: 'purple', shape: 'quarter-circle2' },
+    { color: 'blue', shape: 'pie1' },
     { color: 'blue', shape: 'pie2' }
 ];
 
 let currentPlayer = 1; // Start with player 1
-let player1Pattern = [];
+let player1Queue = [];
 let player2Pattern = [];
 let player1Wins = 0;
 let player2Wins = 0;
@@ -25,17 +25,19 @@ window.onload = () => {
     const shapesContainer = document.getElementById('shapesContainer');
     const timerElement = document.getElementById('timer');
     const stopTimerButton = document.getElementById('stopTimerButton');
-    let timer = 90;
+    const playerScore1Element = document.getElementById('playerScore1');
+    const playerScore2Element = document.getElementById('playerScore2');
+    let timer = 30;
     let countdown;
     let gameActive = true;
 
-    playerNameElement.textContent = `${playerName}, Draw your pattern.`;
+    playerNameElement.textContent = `${playerName}, Draw your pattern for round ${currentRound}.`;
 
     // Create shape options
-    shapes.forEach((shape, index) => {
+    shapes.forEach((shape) => {
         const shapeOption = document.createElement('div');
         shapeOption.classList.add('shapeOption');
-        shapeOption.style.backgroundColor = 'black'; // Background color set to white
+        shapeOption.style.backgroundColor = 'black'; // Background color set to grey
         shapeOption.dataset.shape = shape.shape;
 
         // Create inner element for the actual shape
@@ -71,7 +73,7 @@ window.onload = () => {
         });
 
         // Add click event listener for click-to-place
-        shapeOption.addEventListener('click', (e) => {
+        shapeOption.addEventListener('click', () => {
             if (gameActive) {
                 placeShape(shape);
             }
@@ -82,7 +84,7 @@ window.onload = () => {
     function placeShape(shape) {
         if (!gameActive) return; // Do nothing if game is not active
 
-        const patternArea = currentPlayer === 1 ? patternArea1 : patternArea2;
+        const patternArea = currentPlayer === 1 ? patternArea1 : patternArea2; // Determine the current pattern area
 
         const shapeElement = document.createElement('div');
         shapeElement.classList.add('shape');
@@ -110,14 +112,30 @@ window.onload = () => {
         shapeElement.style.width = '50px';
         shapeElement.style.height = '50px';
         shapeElement.style.position = 'absolute'; // Ensure absolute positioning
-        
+
         // Adjust the position based on the current player
         shapeElement.style.left = '0';
         shapeElement.style.top = '0';
         shapeElement.style.width = '100%';
         shapeElement.style.height = '100%';
         shapeElement.dataset.shape = shape.shape;
+
         patternArea.appendChild(shapeElement);
+
+        // Record the shape and its position
+        const shapeDetails = {
+            color: shape.color,
+            shape: shape.shape,
+            x: shapeElement.style.left,
+            y: shapeElement.style.top
+        };
+
+        // Add to queue for player 1, store for player 2
+        if (currentPlayer === 1) {
+            player1Queue.push(shapeDetails);
+        } else {
+            player2Pattern.push(shapeDetails);
+        }
     }
 
     // Countdown timer
@@ -145,66 +163,45 @@ window.onload = () => {
     function endTurn() {
         gameActive = false;
 
-        const pattern = [];
-        const patternArea = currentPlayer === 1 ? patternArea1 : patternArea2;
-        patternArea.querySelectorAll('.shape').forEach(shape => {
-            pattern.push({
-                color: shape.style.backgroundColor,
-                shape: shape.dataset.shape,
-                x: shape.style.left,
-                y: shape.style.top
-            });
-        });
-
         if (currentPlayer === 1) {
-            player1Pattern = pattern;
-            socket.emit('sendShape', { roomId: 'room1', pattern: player1Pattern });
+            socket.emit('sendShape', { roomId: 'room1', pattern: player1Queue });
             currentPlayer = 2;
-            playerNameElement.textContent = `Player 2, Draw your pattern.`;
+            playerNameElement.textContent = `Player 2, Draw your pattern for round ${currentRound}.`;
             gameActive = true; // Allow second player to draw
-            timer = 90;
+            timer = 30;
             startTimer();
         } else {
-            player2Pattern = pattern;
             determineRoundWinner();
         }
     }
 
     // Function to determine the round winner
     function determineRoundWinner() {
-        // Simple comparison logic to check if the patterns are the same
-        const patternsMatch = JSON.stringify(player1Pattern) === JSON.stringify(player2Pattern);
-
-        if (patternsMatch) {
-            alert('Patterns match! It\'s a draw.');
-        } else {
-            // Compare the number of shapes in each pattern
-            if (player1Pattern.length !== player2Pattern.length) {
-                if (player1Pattern.length > player2Pattern.length) {
-                    player1Wins++;
-                    alert('Player 1 wins this round!');
-                    addRoundResult('player1Result', 10);
-                } else {
-                    player2Wins++;
-                    alert('Player 2 wins this round!');
-                    addRoundResult('player2Result', 10);
-                }
-            } else {
-                let isEqual = true;
-                for (let i = 0; i < player1Pattern.length; i++) {
-                    if (player1Pattern[i].color !== player2Pattern[i].color || player1Pattern[i].shape !== player2Pattern[i].shape) {
-                        isEqual = false;
-                        break;
-                    }
-                }
-                if (isEqual) {
-                    alert('Patterns match! It\'s a draw.');
-                } else {
-                    player1Wins++;
-                    alert('Player 1 wins this round!');
-                }
-            }
+        // Compare player2Pattern with player1Queue
+        const isMatch = player2Pattern.every((shape, index) => {
+            return (
+                shape.shape === player1Queue[index].shape &&
+                shape.color === player1Queue[index].color &&
+                shape.x === player1Queue[index].x &&
+                shape.y === player1Queue[index].y
+            );
+        });
+        
+        if(player2Pattern.length === player1Queue.length && player2Pattern.length === 0)
+        {
+            alert('It is a Draw!!');
         }
+        else if (isMatch && player2Pattern.length === player1Queue.length) {
+            player2Wins++;
+            alert('Player 2 wins this round!');
+        } else {
+            player1Wins++;
+            alert('Player 1 wins this round!');
+        }
+
+        // Update the scores on the HTML
+        playerScore1Element.textContent = `Score: ${player1Wins}`;
+        playerScore2Element.textContent = `Score: ${player2Wins}`;
 
         // Check if we have an overall winner
         if (player1Wins === 2) {
@@ -219,81 +216,50 @@ window.onload = () => {
         }
     }
 
-    // Function to start a new round
-    function startNewRound() {
-        currentRound++;
-        if (currentRound > totalRounds) {
-            if (player1Wins > player2Wins) {
-                alert('Player 1 wins the match!');
-                socket.emit('gameResult', { winner: 'Player 1', loser: 'Player 2' });
-            } else {
-                alert('Player 2 wins the match!');
-                socket.emit('gameResult', { winner: 'Player 2', loser: 'Player 1' });
+        // Function to start a new round
+        function startNewRound() {
+            currentRound++;
+            if (currentRound > totalRounds) {
+                if (player1Wins > player2Wins) {
+                    alert('Player 1 wins the match!');
+                    socket.emit('gameResult', { winner: 'Player 1', loser: 'Player 2' });
+                } else {
+                    alert('Player 2 wins the match!');
+                    socket.emit('gameResult', { winner: 'Player 2', loser: 'Player 1' });
+                }
+                return;
             }
-        } else {
-            player1Pattern = [];
+        
+            // Clear pattern areas
+            patternArea1.innerHTML = '';
+            patternArea2.innerHTML = '';
+        
+            // Reset game variables for a new round
+            player1Queue = [];
             player2Pattern = [];
-            patternArea1.innerHTML = ''; // Clear pattern area 1
-            patternArea2.innerHTML = ''; // Clear pattern area 2
             currentPlayer = 1;
             gameActive = true;
-            playerNameElement.textContent = `Player 1, Draw your pattern for Round ${currentRound}.`;
-            timer = 90;
+            timer = 30;
+            playerNameElement.textContent = `Player 1, Draw your pattern for round ${currentRound}.`;
+            playerScore1Element.textContent = `Score: ${player1Wins}`;
+            playerScore2Element.textContent = `Score: ${player2Wins}`;
             startTimer();
         }
-    }
-
-    // Function to add round result to player's result container
-    function addRoundResult(playerId, score) {
-        // Select the player result container based on playerId
-        var playerResultContainer = document.getElementById(playerId);
-
-        // Update the score
-        var playerScoreElement = playerResultContainer.querySelector('.playerScore');
-        var currentScore = parseInt(playerScoreElement.textContent);
-        var newScore = currentScore + score;
-        playerScoreElement.textContent = newScore;
-    }
-
-    // Socket events handling
-    socket.on('receiveShape', ({ pattern }) => {
-        const patternArea = currentPlayer === 2 ? patternArea1 : patternArea2;
-
-        patternArea.innerHTML = ''; // Clear previous shapes
-
-        pattern.forEach(shape => {
-            const shapeElement = document.createElement('div');
-            shapeElement.classList.add('shape');
-            shapeElement.style.backgroundColor = shape.color;
-            shapeElement.dataset.shape = shape.shape;
-            shapeElement.style.width = '50px';
-            shapeElement.style.height = '50px';
-            shapeElement.style.position = 'absolute';
-            shapeElement.style.left = shape.x;
-            shapeElement.style.top = shape.y;
-            patternArea.appendChild(shapeElement);
+    
+        // Event listener for socket event 'startNewRound'
+        socket.on('startNewRound', () => {
+            startNewRound();
         });
-    });
-
-    socket.on('gameResult', ({ winner, loser }) => {
-        // Handle game result if needed
-        if (socket.id === winner) {
-            alert('You won!');
-        } else {
-            alert('You lost!');
+    
+        // Event listener for socket event 'gameEnd'
+        socket.on('gameEnd', () => {
+            gameActive = false;
+            alert('Game over! Please check the final winner.');
+        });
+    
+        // Function to handle game end
+        function handleGameEnd() {
+            socket.emit('gameEnd', { roomId: 'room1' });
         }
-    });
-
-    // Handle new player joining
-    socket.on('playerJoined', (players) => {
-        // Update UI with new player list if needed
-    });
-
-    // Handle player leaving
-    socket.on('playerLeft', (players) => {
-        // Update UI with new player list if needed
-    });
-
-    // Example room creation
-    socket.emit('createRoom', 'room1');
-};
+    }
+    

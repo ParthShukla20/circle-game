@@ -6,6 +6,8 @@
     <title>Photo Copy Game</title>
     <style>
       body {
+        font-weight: bold;
+        font-size: medium;
         margin: 0;
         display: flex;
         justify-content: center;
@@ -73,41 +75,36 @@
       }
 
       .half-circle1 {
-        background-color: yellow;
-        clip-path: polygon(0 0, 100% 0, 100% 100%);
-      }
-
-      .half-circle2 {
-        background-color: yellow;
-        clip-path: polygon(0 0, 100% 0, 100% 100%);
-        transform: rotate(90deg);
-      }
-
-      .pie1 {
-        background-color: blue;
-        clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
-      }
-
-      .pie2 {
-        background-color: blue;
-        clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
-        transform: rotate(270deg);
-      }
-
-      .quarter-circle1 {
-        width: 100px; /* Adjust width as needed */
-        height: 100px; /* Adjust height as needed */
-        background-color: purple; /* Background color for the shape */
-        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
-      }
-
-      .quarter-circle2 {
-        width: 100px; /* Adjust width as needed */
-        height: 100px; /* Adjust height as needed */
-        background-color: purple; /* Background color for the shape */
-        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
-        transform: rotate(180deg);
-      }
+            background-color: yellow;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+        .half-circle2 {
+            background-color: yellow;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            transform: rotate(90deg);
+        }
+        .pie1 {
+            background-color: blue;
+            clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
+        }
+        .pie2 {
+            background-color: blue;
+            clip-path: polygon(50% 50%, 0% 0%, 100% 0%, 100% 100%, 50% 100%);
+            transform: rotate(270deg);
+        }
+        .quarter-circle1 {
+            width: 100px; /* Adjust width as needed */
+            height: 100px; /* Adjust height as needed */
+            background-color: purple; /* Background color for the shape */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
+        }
+        .quarter-circle2 {
+            width: 100px; /* Adjust width as needed */
+            height: 100px; /* Adjust height as needed */
+            background-color: purple; /* Background color for the shape */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 100% 50%);
+            transform: rotate(180deg);
+        }
 
       #timer {
         font-size: 24px;
@@ -125,9 +122,12 @@
       .resultContainer {
         display: flex;
         width: 200px;
+        height: 50px;
+        position: relative;
+        top: 100%;
         flex-direction: column;
         align-items: center;
-        margin: 20px;
+        margin: 20px 50px;
         background: #007bff;
         padding: 30px 10px;
       }
@@ -153,13 +153,16 @@
         border-radius: 50%;
         overflow: hidden;
       }
+      .score{
+        padding-top: 10%; 
+      }
     </style>
 </head>
 <body>
   <div class="container">
     <div id="player1Result" class="resultContainer">
         <div>Player 1 Result</div>
-        <div id="playerScore1"></div>
+        <div id="playerScore1" class="score"></div>
     </div>
     <div id="gameContainer">
         <div id="playerInfo">
@@ -169,14 +172,14 @@
           <div id="patternArea1" class="patternArea"></div> <!-- Pattern area for Player 1 -->
           <div id="patternArea2" class="patternArea"></div> <!-- Pattern area for Player 2 -->
         </div>
-        <div id="score">0</div>
+        
         <div id="shapesContainer"></div>
-        <div id="timer">90</div>
+        <div id="timer">30</div>
         <button id="stopTimerButton">Stop and Submit</button>
     </div>
     <div id="player2Result" class="resultContainer">
         <div>Player 2 Result</div>
-        <div id="playerScore2"></div>
+        <div id="playerScore2" class="score"></div>
     </div>
   </div>
     <script src="/socket.io/socket.io.js"></script>

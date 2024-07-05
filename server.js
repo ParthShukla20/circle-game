@@ -6,7 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 const path = require('path');
-// app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(express.static('public'));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,14 +34,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sendShape', ({ roomId, shape }) => {
-        rooms[roomId].shapes[socket.id] = shape;
-        const opponentId = rooms[roomId].players.find(id => id !== socket.id);
-        io.to(opponentId).emit('receiveShape', shape);
+        if (rooms[roomId]) {
+            rooms[roomId].shapes = rooms[roomId].shapes || {}; // Initialize shapes if not already
+            rooms[roomId].shapes[socket.id] = shape;
+    
+            const opponentId = rooms[roomId].players.find(id => id !== socket.id);
+            if (opponentId) {
+                io.to(opponentId).emit('receiveShape', { pattern: shape });
+            }
+        }
     });
 
-    socket.on('checkShape', ({ roomId, shape }) => {
-        const originalShape = rooms[roomId].shapes[rooms[roomId].players.find(id => id !== socket.id)];
-        if (JSON.stringify(originalShape) === JSON.stringify(shape)) {
+    socket.on('checkShape', ({ roomId, pattern }) => {
+        const originalPattern = rooms[roomId].shapes[rooms[roomId].players.find(id => id !== socket.id)];
+        if (JSON.stringify(originalPattern) === JSON.stringify(pattern)) {
             io.to(roomId).emit('gameResult', { winner: socket.id, loser: rooms[roomId].players.find(id => id !== socket.id) });
         } else {
             io.to(roomId).emit('gameResult', { winner: rooms[roomId].players.find(id => id !== socket.id), loser: socket.id });
@@ -63,17 +69,16 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/game',(req,res)=>{
+app.get('/game', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Home.html'));
+});
 
-     res.sendFile(path.join(__dirname, 'public', 'Home.html'));
-})
-app.post('/start',(req,res)=>{
-
-    const name = req.body.name
-    console.log(name)
+app.post('/start', (req, res) => {
+    const name = req.body.name;
+    console.log(name);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-})
+});
+
 server.listen(3000, () => {
     console.log('listening on *:3000');
 });
- 
